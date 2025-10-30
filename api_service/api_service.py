@@ -1,64 +1,60 @@
 from flask import Flask, request, jsonify
-
 from flask_cors import CORS
+import psycopg2
+import os
 
-import psycopg2, os
-
+# --- Uygulama Yapılandırması ---
 
 app = Flask(__name__)
-
 CORS(app)
 
-
+# Veritabanı bağlantı bilgilerini ortam değişkeninden veya varsayılan değerden alır
 DATABASE_URL = os.getenv(
-
-"DATABASE_URL",
-
-"postgresql://clooud2_2_dp_user:lT7t7P1OWoTiIINtSuPoE3VrRF8IAGBr@dpg-d3ub82re5dus739hupo0-a.oregon-postgres.render.com/clooud2_2_dp"
-
+    "DATABASE_URL",
+    "postgresql://clooud2_2_dp_user:lT7t7P1OWoTiIINtSuPoE3VrRF8IAGBr@dpg-d3ub82re5dus739hupo0-a.oregon-postgres.render.com/clooud2_2_dp"
 )
 
+# --- Veritabanı Fonksiyonu ---
 
 def connect_db():
+    """Veritabanı bağlantısını kurar ve döndürür."""
+    return psycopg2.connect(DATABASE_URL)
 
-return psycopg2.connect(DATABASE_URL)
-
+# --- Rota Tanımlaması ---
 
 @app.route("/ziyaretciler", methods=["GET", "POST"])
-
 def ziyaretciler():
+    """Ziyaretçi verilerini POST ile ekler ve GET ile son 10 ziyaretçiyi listeler."""
+    
+    # Bağlantıyı aç
+    conn = connect_db()
+    cur = conn.cursor()
 
-conn = connect_db()
+    # Eğer yoksa ziyaretciler tablosunu oluştur
+    cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT)")
 
-cur = conn.cursor()
+    if request.method == "POST":
+        # İsim verisini alır
+        isim = request.json.get("isim")
+        
+        # Veritabanına yeni ziyaretçiyi ekler
+        if isim:
+            cur.execute("INSERT INTO ziyaretciler (isim) VALUES (%s)", (isim,))
+            conn.commit()
 
-cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT)")
+    # Son 10 ziyaretçinin ismini veritabanından çeker
+    cur.execute("SELECT isim FROM ziyaretciler ORDER BY id DESC LIMIT 10")
+    isimler = [row[0] for row in cur.fetchall()]
 
+    # Bağlantıları kapat
+    cur.close()
+    conn.close()
 
-if request.method == "POST":
+    # İsim listesini JSON olarak döndürür
+    return jsonify(isimler)
 
-isim = request.json.get("isim")
-
-if isim:
-
-cur.execute("INSERT INTO ziyaretciler (isim) VALUES (%s)", (isim,))
-
-conn.commit()
-
-
-cur.execute("SELECT isim FROM ziyaretciler ORDER BY id DESC LIMIT 10")
-
-isimler = [row[0] for row in cur.fetchall()]
-
-
-cur.close()
-
-conn.close()
-
-
-return jsonify(isimler)
-
+# --- Uygulama Başlatma ---
 
 if __name__ == "__main__":
-
-app.run(host="0.0.0.0", port=5001)
+    # Uygulamayı 5001 portunda tüm arayüzlerde çalıştırır
+    app.run(host="0.0.0.0", port=5001)
