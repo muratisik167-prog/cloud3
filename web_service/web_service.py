@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # Arka uç (backend) mikro hizmetinin adresi. 
 # Genellikle ortam değişkenlerinden (environment variables) alınması önerilir.
-API_URL = os.getenv("API_URL", "https://hello-cloud4.onrender.com")
+API_URL = os.getenv("API_URL", "https://cloud3-d9ds.onrender.com")
 
 # --- HTML Şablonu (Front-End Görünümü) ---
 
