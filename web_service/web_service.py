@@ -31,8 +31,7 @@ li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-rad
 <p>ŞEHİR yaz</p>
 <form method="POST">
 <input type="text" name="isim" placeholder="Adını yaz" required>
-<form method="POST">
-<input type="text" name="ŞEHİR" placeholder="ŞEHİR yaz" required>
+<input type="text" name="SEHİR" placeholder="SEHİR yaz" required>
 <button type="submit">Gönder</button>
 </form>
 <h3>Ziyaretçiler:</h3>
@@ -55,9 +54,11 @@ def index():
     """
     if request.method == "POST":
         isim = request.form.get("isim")
+        SEHİR = request.from.get("SEHİR")
         # Arka uçtaki "/ziyaretciler" rotasına POST isteği gönderir
         if isim:
             requests.post(API_URL + "/ziyaretciler", json={"isim": isim})
+            requests.post(API_URL + "/ziyaretciler", json={"SEHİR": isim})
         return redirect("/")
 
     # GET isteği: Ziyaretçi listesini çeker
