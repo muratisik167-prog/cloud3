@@ -1,17 +1,12 @@
 from flask import Flask, render_template_string, request, redirect
 import requests
-import os # Bu kütüphaneyi ortam değişkeni kullanımı için ekledim (API_URL'i env'den almak için pratik)
+import os
 
 # --- Uygulama Yapılandırması ---
-
 app = Flask(__name__)
-
-# Arka uç (backend) mikro hizmetinin adresi. 
-# Genellikle ortam değişkenlerinden (environment variables) alınması önerilir.
 API_URL = os.getenv("API_URL", "https://cloud3-d9ds.onrender.com")
 
-# --- HTML Şablonu (Front-End Görünümü) ---
-
+# --- HTML Şablonu (DÜZELTİLMİŞ) ---
 HTML_SABLONU = """
 <!doctype html>
 <html>
@@ -20,20 +15,24 @@ HTML_SABLONU = """
 <style>
 body { font-family: Arial; text-align: center; padding: 50px; background: #eef2f3; }
 h1 { color: #333; }
-input { padding: 10px; font-size: 16px; }
+input { padding: 10px; font-size: 16px; margin: 5px; }
 button { padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; }
-li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-radius: 5px; list-style: none; } /* list-style: none ekledim */
+li { background: white; margin: 5px auto; width: 250px; padding: 8px; border-radius: 5px; list-style: none; }
 </style>
 </head>
 <body>
 <h1>Mikro Hizmetli Selam!</h1>
-<p>Adını yaz</p>
-<p>ŞEHİR yaz</p>
+<p>Adınızı ve şehrinizi yazın</p>
+
 <form method="POST">
-<input type="text" name="isim" placeholder="Adını yaz" required>
-<form method="POST">  <input type="text" name="SEHİR" placeholder="SEHİR yaz" required>
-<button type="submit">Gönder</button>
+    <input type="text" name="isim" placeholder="Adınızı yazın" required>
+    
+    <input type="text" name="sehir" placeholder="Şehrinizi yazın" required>
+    
+    <button type="submit">Gönder</button>
 </form>
+
+<hr>
 <h3>Ziyaretçiler:</h3>
 <ul>
 {% for ad in isimler %}
@@ -44,29 +43,39 @@ li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-rad
 </html>
 """
 
-# --- Rota Tanımlaması ---
+# --- Rota Tanımlaması (DÜZELTİLMİŞ) ---
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    """
-    POST: Ziyaretçi adını arka uca (API_URL) gönderir ve ana sayfaya yönlendirir.
-    GET: Arka uçtan (API_URL) ziyaretçi listesini çeker ve HTML şablonunu gösterir.
-    """
     if request.method == "POST":
+        # Formdan veriler (küçük harfle) alınıyor
         isim = request.form.get("isim")
-        SEHİR = request.from.get("SEHİR")
-        # Arka uçtaki "/ziyaretciler" rotasına POST isteği gönderir
-        if isim:
-            requests.post(API_URL + "/ziyaretciler", json={"isim": isim})
+        
+        # HATA 2 DÜZELTİLDİ: 'request.form' kullanıldı ve değişken adı 'sehir' oldu
+        sehir = request.form.get("sehir") 
+        
+        # Hem isim hem de şehir varsa API'ye gönder
+        if isim and sehir:
+            # HATA 3 DÜZELTİLDİ: API'ye hem 'isim' hem de 'sehir' JSON olarak gönderiliyor
+            payload = {
+                "isim": isim,
+                "sehir": sehir  # API'nizin beklediği anahtar (key) 'sehir' olmalı
+            }
+            try:
+                # Arka uçtaki "/ziyaretciler" rotasına POST isteği gönderir
+                requests.post(API_URL + "/ziyaretciler", json=payload)
+            except requests.exceptions.RequestException as e:
+                print(f"API'ye POST isteği gönderilemedi: {e}")
+                # Kullanıcıya hata göstermek de iyi bir fikir olabilir
+                
+        # Başarılı veya başarısız (şimdilik) her durumda ana sayfaya yönlendir
         return redirect("/")
 
-    # GET isteği: Ziyaretçi listesini çeker
+    # --- GET isteği: Ziyaretçi listesini çeker ---
     try:
         resp = requests.get(API_URL + "/ziyaretciler")
-        # Eğer istek başarılıysa (200), JSON verisini alır. Başarısızsa boş liste kullanır.
         isimler = resp.json() if resp.status_code == 200 else []
     except requests.exceptions.RequestException:
-        # İstek sırasında bir hata oluşursa (örneğin, bağlantı hatası)
         isimler = ["Bağlantı hatası: Arka uç API'sine ulaşılamadı."]
         
     return render_template_string(HTML_SABLONU, isimler=isimler)
@@ -74,5 +83,4 @@ def index():
 # --- Uygulama Başlatma ---
 
 if __name__ == "__main__":
-    # Uygulamayı 5000 portunda tüm arayüzlerde çalıştırır
     app.run(host="0.0.0.0", port=5000)
