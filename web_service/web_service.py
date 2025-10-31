@@ -4,7 +4,7 @@ import os
 
 # --- Uygulama Yapılandırması ---
 app = Flask(__name__)
-API_URL = os.getenv("API_URL", "https://eren-cloud.onrender.com")
+API_URL = os.getenv("API_URL", "https://cloud3-d9ds.onrender.com")
 
 # --- HTML Şablonu (DÜZELTİLMİŞ) ---
 HTML_SABLONU = """
