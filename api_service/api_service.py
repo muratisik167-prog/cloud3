@@ -31,20 +31,21 @@ def ziyaretciler():
     cur = conn.cursor()
 
     # Eğer yoksa ziyaretciler tablosunu oluştur
-    cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS ziyaretciler (id SERIAL PRIMARY KEY, isim TEXT, SEHİR TEXT)")
 
     if request.method == "POST":
         # İsim verisini alır
         isim = request.json.get("isim")
+        SEHİR = request.json.get("SEHİR")
         
         # Veritabanına yeni ziyaretçiyi ekler
-        if isim:
-            cur.execute("INSERT INTO ziyaretciler (isim) VALUES (%s)", (isim,))
+        if isim and SEHİR:
+            cur.execute("INSERT INTO ziyaretciler (isim,SEHİR) VALUES (%s, %s)", (isim,SEHİR,))
             conn.commit()
 
     # Son 10 ziyaretçinin ismini veritabanından çeker
-    cur.execute("SELECT isim FROM ziyaretciler ORDER BY id DESC LIMIT 10")
-    isimler = [row[0] for row in cur.fetchall()]
+    cur.execute("SELECT isim,SEHİR FROM ziyaretciler ORDER BY id DESC LIMIT 10")
+    isimler = [f"{isim} ({SEHİR})" for isim, sehir in cur.fetchall()]
 
     # Bağlantıları kapat
     cur.close()
