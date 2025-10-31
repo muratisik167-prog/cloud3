@@ -58,7 +58,6 @@ def index():
         # Arka uçtaki "/ziyaretciler" rotasına POST isteği gönderir
         if isim:
             requests.post(API_URL + "/ziyaretciler", json={"isim": isim})
-            requests.post(API_URL + "/ziyaretciler", json={"SEHİR": isim})
         return redirect("/")
 
     # GET isteği: Ziyaretçi listesini çeker
