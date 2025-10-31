@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://clooud2_2_dp_user:lT7t7P1OWoTiIINtSuPoE3VrRF8IAGBr@dpg-d3ub82re5dus739hupo0-a.oregon-postgres.render.com/clooud2_2_dp"
+    "postgresql://cloud3_dp_user:rb1egF21VpP9uWwJEx1rwBw6U6Pc4zih@dpg-d42731uuk2gs73bbk070-a.oregon-postgres.render.com/cloud3_dp"
 )
 
 # --- Veritabanı Fonksiyonu ---
