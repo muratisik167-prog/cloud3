@@ -31,6 +31,7 @@ li { background: white; margin: 5px auto; width: 200px; padding: 8px; border-rad
 <p>ŞEHİR yaz</p>
 <form method="POST">
 <input type="text" name="isim" placeholder="Adını yaz" required>
+<form method="POST">
 <input type="text" name="ŞEHİR" placeholder="ŞEHİR yaz" required>
 <button type="submit">Gönder</button>
 </form>
